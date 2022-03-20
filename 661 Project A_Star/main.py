@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
+
 
 # In[1]:
 
@@ -264,7 +263,7 @@ def check_l2(curr_node, board, thresh, goal_location):
     compressed_width = int(np.floor(x_res/thresh))
     compressed_angle = 0 if theta_res == 0 else int(np.floor(360/theta_res))-1
 
-    print("Board size: ", len(board),len(board[0]),len(board[0][0]))
+    print("Left 2, Board size: ", len(board),len(board[0]),len(board[0][0]))
     print("X Y and theta : ", x_res,y_res,compressed_angle)
     new_node = board[compressed_height][compressed_width][compressed_angle]
     if h < new_node.h:
@@ -321,7 +320,7 @@ def check_l1(curr_node, board, thresh, goal_location):
     compressed_width = int(np.floor(x_res/thresh))
     compressed_angle = 0 if theta_res == 0 else int(np.floor(360/theta_res))-1
 
-    print("Board size: ", len(board),len(board[0]),len(board[0][0]))
+    print("Left 1, Board size: ", len(board),len(board[0]),len(board[0][0]))
     print("X Y and theta : ", x_res,y_res,compressed_angle)
     new_node = board[compressed_height][compressed_width][compressed_angle]
     if h < new_node.h:
@@ -373,7 +372,7 @@ def check_m(curr_node, board, thresh, goal_location):
     compressed_width = int(np.floor(x_res/thresh))
     compressed_angle = 0 if theta_res == 0 else int(np.floor(360/theta_res))-1
 
-    print("Board size: ", len(board),len(board[0]),len(board[0][0]))
+    print("Center, Board size: ", len(board),len(board[0]),len(board[0][0]))
     print("X Y and theta : ", x_res,y_res,compressed_angle,theta_res)
     new_node = board[compressed_height][compressed_width][compressed_angle]
     if h < new_node.h:
@@ -427,7 +426,7 @@ def check_r1(curr_node, board, thresh, goal_location):
     compressed_width = int(np.floor(x_res/thresh))
     compressed_angle = 0 if theta_res == 0 else int(np.floor(360/theta_res))-1
 
-    print("Board size: ", len(board),len(board[0]),len(board[0][0]))
+    print("Right 1, Board size: ", len(board),len(board[0]),len(board[0][0]))
     print("X Y and theta : ", x_res,y_res,compressed_angle)
     new_node = board[compressed_height][compressed_width][compressed_angle]
     if h < new_node.h:
@@ -481,7 +480,7 @@ def check_r2(curr_node, board,thresh, goal_location):
     compressed_width = int(np.floor(x_res/thresh))
     compressed_angle = 0 if theta_res == 0 else int(np.floor(360/theta_res))-1
 
-    print("Board size: ", len(board),len(board[0]),len(board[0][0]))
+    print("Right 2, Board size: ", len(board),len(board[0]),len(board[0][0]))
     print("X Y and theta : ", x_res,y_res,compressed_angle)
     new_node = board[compressed_height][compressed_width][compressed_angle]
     if h < new_node.h:
@@ -644,4 +643,3 @@ print('Animating Search Pattern')
 # back track and animate the search and solution
 solution_path = get_solution_path(curr_node)
 animate(color_map, closed_nodes, solution_path, filename='search')
-
