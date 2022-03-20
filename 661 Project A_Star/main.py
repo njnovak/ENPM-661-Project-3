@@ -227,7 +227,8 @@ def check_l2(curr_node, board, thresh, goal_location):
     curr_row = curr_node.cell_location[0]
     curr_col = curr_node.cell_location[1]
     curr_angle = curr_node.cell_location[2]
-    
+    print(curr_row,curr_col,curr_angle)
+
     theta_res = (curr_angle + 60)%360
     
     # TODO: Change to new round func.
@@ -263,8 +264,8 @@ def check_l2(curr_node, board, thresh, goal_location):
     compressed_width = int(np.floor(x_res/thresh))
     compressed_angle = 0 if theta_res == 0 else int(np.floor(360/theta_res))-1
 
-    # print("Board size: ", len(board),len(board[0]),len(board[0][0]))
-    # print("X Y and theta : ", x_res,y_res,compressed_angle)
+    print("Board size: ", len(board),len(board[0]),len(board[0][0]))
+    print("X Y and theta : ", x_res,y_res,compressed_angle)
     new_node = board[compressed_height][compressed_width][compressed_angle]
     if h < new_node.h:
         new_node.parent = curr_node
@@ -283,8 +284,12 @@ def check_l1(curr_node, board, thresh, goal_location):
     curr_row = curr_node.cell_location[0]
     curr_col = curr_node.cell_location[1]
     curr_angle = curr_node.cell_location[2]
-    
+    print(curr_row,curr_col,curr_angle)
+
     theta_res = (curr_angle + 30)%360
+    
+    # TODO: Change to new round func.
+
     x_res = int(np.floor(curr_col + np.cos(np.deg2rad(theta_res))))
     y_res = int(np.floor(curr_row + np.sin(np.deg2rad(theta_res))))
 
@@ -316,8 +321,8 @@ def check_l1(curr_node, board, thresh, goal_location):
     compressed_width = int(np.floor(x_res/thresh))
     compressed_angle = 0 if theta_res == 0 else int(np.floor(360/theta_res))-1
 
-    # print("Board size: ", len(board),len(board[0]),len(board[0][0]))
-    # print("X Y and theta : ", x_res,y_res,compressed_angle)
+    print("Board size: ", len(board),len(board[0]),len(board[0][0]))
+    print("X Y and theta : ", x_res,y_res,compressed_angle)
     new_node = board[compressed_height][compressed_width][compressed_angle]
     if h < new_node.h:
         new_node.parent = curr_node
@@ -336,7 +341,7 @@ def check_m(curr_node, board, thresh, goal_location):
     curr_row = curr_node.cell_location[0]
     curr_col = curr_node.cell_location[1]
     curr_angle = curr_node.cell_location[2]
-    
+    print(curr_row,curr_col,curr_angle)
     theta_res = (curr_angle)%360
     x_res = int(np.floor(curr_col + np.cos(np.deg2rad(theta_res))))
     y_res = int(np.floor(curr_row + np.sin(np.deg2rad(theta_res))))
@@ -388,7 +393,8 @@ def check_r1(curr_node, board, thresh, goal_location):
     curr_row = curr_node.cell_location[0]
     curr_col = curr_node.cell_location[1]
     curr_angle = curr_node.cell_location[2]
-    
+    print(curr_row,curr_col,curr_angle)
+
     theta_res = (curr_angle - 30)%360
     x_res = int(np.floor(curr_col + np.cos(np.deg2rad(theta_res))))
     y_res = int(np.floor(curr_row + np.sin(np.deg2rad(theta_res))))
@@ -421,8 +427,8 @@ def check_r1(curr_node, board, thresh, goal_location):
     compressed_width = int(np.floor(x_res/thresh))
     compressed_angle = 0 if theta_res == 0 else int(np.floor(360/theta_res))-1
 
-    # print("Board size: ", len(board),len(board[0]),len(board[0][0]))
-    # print("X Y and theta : ", x_res,y_res,compressed_angle)
+    print("Board size: ", len(board),len(board[0]),len(board[0][0]))
+    print("X Y and theta : ", x_res,y_res,compressed_angle)
     new_node = board[compressed_height][compressed_width][compressed_angle]
     if h < new_node.h:
         new_node.parent = curr_node
@@ -441,7 +447,8 @@ def check_r2(curr_node, board,thresh, goal_location):
     curr_row = curr_node.cell_location[0]
     curr_col = curr_node.cell_location[1]
     curr_angle = curr_node.cell_location[2]
-    
+    print(curr_row,curr_col,curr_angle)
+
     theta_res = (curr_angle - 60)%360
     x_res = int(np.floor(curr_col + np.cos(np.deg2rad(theta_res))))
     y_res = int(np.floor(curr_row + np.sin(np.deg2rad(theta_res))))
@@ -474,8 +481,8 @@ def check_r2(curr_node, board,thresh, goal_location):
     compressed_width = int(np.floor(x_res/thresh))
     compressed_angle = 0 if theta_res == 0 else int(np.floor(360/theta_res))-1
 
-    # print("Board size: ", len(board),len(board[0]),len(board[0][0]))
-    # print("X Y and theta : ", x_res,y_res,compressed_angle)
+    print("Board size: ", len(board),len(board[0]),len(board[0][0]))
+    print("X Y and theta : ", x_res,y_res,compressed_angle)
     new_node = board[compressed_height][compressed_width][compressed_angle]
     if h < new_node.h:
         new_node.parent = curr_node
@@ -588,6 +595,7 @@ closed_nodes = []
 found = False
 
 print('Searching')
+o_board = create_board(400,250)
 while len(open_nodes) > 0:
     # generate the colors of the current board and append it to the list
     # this will be a frame of an animation
@@ -606,7 +614,7 @@ while len(open_nodes) > 0:
         found = True
         break
     else:
-        next_possible_nodes = gen_next_nodes(create_board(400,250), curr_node)
+        next_possible_nodes = gen_next_nodes(o_board, curr_node)
         for node in next_possible_nodes:
 
             appendable = True
