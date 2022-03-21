@@ -5,6 +5,8 @@ from copy import deepcopy
 import cv2
 from cv2 import VideoWriter, VideoWriter_fourcc
 import sys
+
+
 # node class that each spot in the map will occupy
 # cell location and goal_location are tuples representing index 
 # of current cell location and goal cell locations
@@ -16,6 +18,8 @@ class Node:
         self.c2c = c2c
         self.c2g = c2g
         self.h = c2c+c2g
+
+
 # given 2 points of a line, retrun a lambda function which caluclates the 
 # y value of an x
 def generate_line_eq(p1, p2):
@@ -32,6 +36,8 @@ def generate_line_eq(p1, p2):
     lin_func = lambda x: m*x+b
     
     return lin_func
+
+
 # read the board and depending on each nodes status
 # write the proper color in a numpy array as BGR colors
 def create_color_map(height, width, radius):
@@ -53,6 +59,8 @@ def create_color_map(height, width, radius):
 
     color_map = generate_margin(color_map, radius)
     return color_map
+
+
 # hardcoded obstacles defined by their vertices and origins
 # we just see if the current x and y are within bounding lines
 def check_obstacle(x, y):
@@ -95,6 +103,8 @@ def check_obstacle(x, y):
                 return True
 
     return False
+
+
 # iterate over the board, and if the cell is an obstacle, generate 
 # the a circle of points around it which are padding
 def generate_margin(color_map, radius):
@@ -121,16 +131,19 @@ def generate_margin(color_map, radius):
                                     color_map[int(y_i)][x_i][2] == [0]):
                                 color_map[int(y_i)][x_i] = [0,255,0]
     return color_map
+
+
 # pass in color map coordinates and convert them to board 
 # coordinates which have been compressed/expanded coordinates 
 # by the neighborhood threshold
-
 def compress_coordinates(x, y, theta, thresh):
     compressed_x = int(np.floor(x/thresh))
     compressed_y = int(np.floor(y/thresh))
     compressed_angle = 0 if theta == 0 else int(np.floor(360/theta))-1
 
     return compressed_x, compressed_y, compressed_angle
+
+
 # will be used when iterating over closed nodes
 # updates the previous color map given the current node to a specifies color
 def update_color_map(curr_node, color_map, brg_color):
@@ -143,6 +156,8 @@ def update_color_map(curr_node, color_map, brg_color):
     color_map[row][col][2] = brg_color[2]
 
     return color_map
+
+
 # create the board
 # returns a 3d array
 # dimensions are height width and angle. Takes in a compressed version of 
@@ -175,6 +190,8 @@ def create_board(width, height, thresh):
         board.append(temp_row)
 
     return board
+
+
 # checking the left most command ie +60 degrees
 def check_l2(curr_node, board, goal_location, color_map, step, thresh):
     
@@ -225,6 +242,8 @@ def check_l2(curr_node, board, goal_location, color_map, step, thresh):
         new_node.h = h
         
     return new_node
+
+
 # checking the left most command ie 30 degrees
 def check_l1(curr_node, board, goal_location, color_map, step, thresh):
     
@@ -274,6 +293,8 @@ def check_l1(curr_node, board, goal_location, color_map, step, thresh):
         new_node.h = h
         
     return new_node
+
+
 # checking the middle ie 30 degrees
 def check_m(curr_node, board, goal_location, color_map, step, thresh):
     
@@ -323,6 +344,8 @@ def check_m(curr_node, board, goal_location, color_map, step, thresh):
         new_node.h = h
         
     return new_node
+
+
 # checking the inside right command ie -30 degrees
 def check_r1(curr_node, board, goal_location, color_map, step, thresh):
     
@@ -373,6 +396,8 @@ def check_r1(curr_node, board, goal_location, color_map, step, thresh):
         new_node.h = h
         
     return new_node
+
+
 # checking the outside right command ie -60 degrees
 def check_r2(curr_node, board, goal_location, color_map, step, thresh):
     
@@ -423,6 +448,8 @@ def check_r2(curr_node, board, goal_location, color_map, step, thresh):
         new_node.h = h
 
     return new_node
+
+
 # generate next possible nodes for the current one
 # filter out null ones which happens in a bpundary condition
 def gen_next_nodes(curr_node, board, goal_location, color_map, step, thresh):
@@ -436,6 +463,8 @@ def gen_next_nodes(curr_node, board, goal_location, color_map, step, thresh):
     new_nodes.append(check_r2(curr_node, board, goal_location, color_map, step, thresh))
 
     return list(filter(lambda node: node is not None, new_nodes))
+
+
 # this is the backtracking function
 # returns a list of nodes in order to find the solution
 def get_solution_path(curr_node):
@@ -446,9 +475,10 @@ def get_solution_path(curr_node):
         curr_node = curr_node.parent
         
     return solution_path
+
+
 # use cv2 in order to draw how the node 
 # traversal looks as well as plot the shortest path
-
 def animate(color_map, closed_nodes, solution_path, start, filename):
     out = cv2.VideoWriter(f'{filename}.avi',cv2.VideoWriter_fourcc(*'DIVX'), 60, (400, 250))
  
@@ -469,108 +499,131 @@ def animate(color_map, closed_nodes, solution_path, start, filename):
         out.write(np.flipud(color_map))
         out.write(np.flipud(color_map))
         
-        
     out.release()
-start_location = [0,0,0]
-goal_location = [100,350,0]
-
-width = 400
-height = 250
-
-step = 5
-thresh = 0.5
-
-color_map = create_color_map(height = 250, width = 400, radius=15)
 
 
-if start_location[0] not in range(0, height) or start_location[1] not in range(0, width):
-    print("Start Location Out Of Bounds")
+def validate_inputs(height, width, start_location, goal_location, color_map):
+    if start_location[0] not in range(0, height) or start_location[1] not in range(0, width):
+        print("Start Location Out Of Bounds")
+        return False
 
-if goal_location[0] not in range(0, height) or goal_location[1] not in range(0, width):
-    print("Goal Location Out Of Bounds")
+    if goal_location[0] not in range(0, height) or goal_location[1] not in range(0, width):
+        print("Goal Location Out Of Bounds")
+        return False
 
-if color_map[start_location[0]][start_location[1]][0] == 255 or color_map[start_location[0]][start_location[1]][1] == 255:
-    print('Cannot start in obstacle or obstacle margin')
+    if color_map[start_location[0]][start_location[1]][0] == 255 or color_map[start_location[0]][start_location[1]][1] == 255:
+        print('Cannot start in obstacle or obstacle margin')
+        return False
 
-if color_map[goal_location[0]][goal_location[1]][0] == 255 or color_map[goal_location[0]][goal_location[1]][1] == 255:
-    print('Cannot place goal in obstacle or obstacle margin')
-board = create_board(width=width, height=height, thresh=thresh)
+    if color_map[goal_location[0]][goal_location[1]][0] == 255 or color_map[goal_location[0]][goal_location[1]][1] == 255:
+        print('Cannot place goal in obstacle or obstacle margin')
+        return False
 
-compressed_x_start, compressed_y_start, compressed_angle_start = compress_coordinates(
-    start_location[1],
-    start_location[0],
-    start_location[2],
-    thresh=thresh
-)
+    return True
 
-compressed_x_goal, compressed_y_goal, compressed_angle_goal = compress_coordinates(
-    goal_location[1],
-    goal_location[0],
-    goal_location[2],
-    thresh=thresh
-)
+def main():
 
-print(f'Starting in region x: {compressed_x_start}, y: {compressed_y_start}, theta: {compressed_angle_start}')
-print(f'Goal in region x: {compressed_x_goal}, y: {compressed_y_goal}, theta: {compressed_angle_goal}')
+    # starting paramters
+    start_location = [0,0,0]
+    goal_location = [100,350,60]
 
-plt.imshow(color_map, origin='lower')
+    width = 400
+    height = 250
+
+    step = 5
+    thresh = 0.5
+
+    print('Building Color Map')
+    color_map = create_color_map(height = 250, width = 400, radius=15)
+
+    if not validate_inputs(height, width, start_location, goal_location, color_map):
+        return 1
+
+    print('Building Board')
+    board = create_board(width=width, height=height, thresh=thresh)
+
+    compressed_x_start, compressed_y_start, compressed_angle_start = compress_coordinates(
+        start_location[1],
+        start_location[0],
+        start_location[2],
+        thresh=thresh
+    )
+
+    compressed_x_goal, compressed_y_goal, compressed_angle_goal = compress_coordinates(
+        goal_location[1],
+        goal_location[0],
+        goal_location[2],
+        thresh=thresh
+    )
+
+    print(f'Starting in region x: {compressed_x_start}, y: {compressed_y_start}, theta: {compressed_angle_start}')
+    print(f'Goal in region x: {compressed_x_goal}, y: {compressed_y_goal}, theta: {compressed_angle_goal}')
+
+    plt.imshow(color_map, origin='lower')
 
 
-start_node = board[compressed_y_start][compressed_x_start][compressed_angle_start]
-start_node.c2c = 0
-goal_region = board[compressed_y_goal][compressed_x_goal][compressed_angle_goal].region
+    start_node = board[compressed_y_start][compressed_x_start][compressed_angle_start]
+    start_node.c2c = 0
+    goal_region = board[compressed_y_goal][compressed_x_goal][compressed_angle_goal].region
 
-open_nodes = [start_node]
-closed_nodes = []
+    open_nodes = [start_node]
+    closed_nodes = []
 
-found = False
+    found = False
 
-print(f'Searching for goal region: {goal_region}')
-while len(open_nodes) > 0:
+    print(f'Searching for goal region: {goal_region}')
+    while len(open_nodes) > 0:
 
-    open_nodes.sort(key=lambda x: x.h)
-    curr_node = open_nodes.pop(0)
-    closed_nodes.append(curr_node)
+        open_nodes.sort(key=lambda x: x.h)
+        curr_node = open_nodes.pop(0)
+        closed_nodes.append(curr_node)
 
-    # print(f"Current node has exact coordinates of x:{curr_node.cell_location[1]} y:{curr_node.cell_location[0]} Theta:{curr_node.cell_location[2]}")
-    print(f"Current node is in region coordinates of {curr_node.region}")
+        # print(f"Current node has exact coordinates of x:{curr_node.cell_location[1]} y:{curr_node.cell_location[0]} Theta:{curr_node.cell_location[2]}")
+        print(f"Current node is in region coordinates of {curr_node.region}")
 
 
-    if curr_node.region[:2] == goal_region[:2]:
-        print('Found Solution')
-        found = True
-        break
+        if curr_node.region == goal_region:
+            print('Found Solution')
+            found = True
+            break
 
-    else:
-        next_possible_nodes = gen_next_nodes(
-            curr_node=curr_node,
-            board=board,
-            goal_location=goal_location,
-            color_map=color_map,
-            step=step,
-            thresh=thresh
-        )
-        
-        for node in next_possible_nodes:
+        else:
+            next_possible_nodes = gen_next_nodes(
+                curr_node=curr_node,
+                board=board,
+                goal_location=goal_location,
+                color_map=color_map,
+                step=step,
+                thresh=thresh
+            )
+            
+            for node in next_possible_nodes:
 
-            appendable = True
-            for o_node in open_nodes:
-                if o_node.region == node.region:
-                    appendable = False
-                    break
-            if appendable:
-                for c_node in closed_nodes:
-                    if c_node.region == node.region:
+                appendable = True
+                for o_node in open_nodes:
+                    if o_node.region == node.region:
                         appendable = False
                         break
+                if appendable:
+                    for c_node in closed_nodes:
+                        if c_node.region == node.region:
+                            appendable = False
+                            break
 
-            if appendable:
-                open_nodes.append(node)
+                if appendable:
+                    open_nodes.append(node)
 
-if not found:
-    print('No Solution')
+    if not found:
+        print('No Solution')
 
-print('Animating Search Pattern')          
-# back track and animate the search and solution
-solution_path = get_solution_path(curr_node)
-animate(color_map, closed_nodes, solution_path, start_location, filename='search')
+    print('Animating Search Pattern')          
+    # back track and animate the search and solution
+    solution_path = get_solution_path(curr_node)
+    animate(color_map, closed_nodes, solution_path, start_location, filename='search')
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except:
+        pass
