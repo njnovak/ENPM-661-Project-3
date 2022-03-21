@@ -454,9 +454,9 @@ def animate(color_map, closed_nodes, solution_path, start, filename):
  
     for node in closed_nodes:
         # new_map = np.flipud(update_color_map(node, color_map, [255, 255, 255]))
-        if node.cell_location != start:
+        if node.cell_location != start and node.parent.cell_location != start:
             parent_node = node.parent
-            cv2.arrowedLine(color_map,(int(node.cell_location[1]),int(node.cell_location[0])),(int(parent_node.cell_location[1]),int(parent_node.cell_location[0])),[255,255,255],1)
+            cv2.arrowedLine(color_map,(int(parent_node.cell_location[1]-1),int(parent_node.cell_location[0]-1)),(int(node.cell_location[1]),int(node.cell_location[0])),[255,255,255],1,tipLength = 0.5)
         out.write(np.flipud(color_map))
         
     for node in solution_path:
@@ -472,12 +472,12 @@ def animate(color_map, closed_nodes, solution_path, start, filename):
         
     out.release()
 start_location = [0,0,0]
-goal_location = [100,300,0]
+goal_location = [100,350,0]
 
 width = 400
 height = 250
 
-step = 2
+step = 5
 thresh = 0.5
 
 color_map = create_color_map(height = 250, width = 400, radius=15)
