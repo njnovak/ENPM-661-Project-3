@@ -13,7 +13,7 @@ If the program does not stop running, try quitting and restarting the program.
 
 Any other inquires can be sent to nnovak@umd.edu
 
-Operation can be seen at: https://youtu.be/pYcHBddxeaA or in the included default_path.avi file
+Operation can be seen at: https://youtu.be/yEB2P0-J_AI or in the included default_path.avi file
 
 Code can be found at: https://github.com/njnovak/661-Project-2
 
