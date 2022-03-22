@@ -482,12 +482,18 @@ def get_solution_path(curr_node):
 def animate(color_map, closed_nodes, solution_path, start, filename):
     out = cv2.VideoWriter(f'{filename}.avi',cv2.VideoWriter_fourcc(*'DIVX'), 60, (400, 250))
  
+    base_map = np.copy(color_map)
+    updating_map = np.copy(color_map)
     for node in closed_nodes:
         # new_map = np.flipud(update_color_map(node, color_map, [255, 255, 255]))
         if node.cell_location != start and node.parent.cell_location != start:
             parent_node = node.parent
-            cv2.arrowedLine(color_map,(int(parent_node.cell_location[1]-1),int(parent_node.cell_location[0]-1)),(int(node.cell_location[1]),int(node.cell_location[0])),[255,255,255],1,tipLength = 0.5)
-        out.write(np.flipud(color_map))
+            # if parent_node.cell_location!=start:
+            cv2.arrowedLine(base_map,(int(parent_node.cell_location[1]-1),int(parent_node.cell_location[0]-1)),(int(node.cell_location[1]),int(node.cell_location[0])),[255,255,255],1,tipLength = 0.5)
+            cv2.arrowedLine(updating_map,(int(parent_node.cell_location[1]-1),int(parent_node.cell_location[0]-1)),(int(node.cell_location[1]),int(node.cell_location[0])),[255,255,255],1,tipLength = 0.5)
+        out.write(np.flipud(base_map))
+    color_map = updating_map
+
         
     for node in solution_path:
         # new_map = np.flipud(update_color_map(node, color_map, [0, 0, 255]))
@@ -532,6 +538,31 @@ def main():
 
     step = 5
     thresh = 0.5
+    start_x,start_y,start_a = 1000,1000,1000
+    while start_x not in range(0,399) and start_y not in range(0,249) and start_a%30 != 0:
+        start_x = int(input("What is the x value of the start location(range 0-399)? "))
+        start_y = int(input("What is the y value of the start location(range 0-249)? "))
+        start_a = int(input("What is the orientation value of the start location(in increments of 30) ? "))
+    start_location = [start_y,start_x,start_a]
+    goal_location = [100,350,60]
+    goal_x,goal_y,goal_a = 1000,1000,1000
+
+    while goal_x not in range(0,399) and goal_y not in range(0,249) and goal_a%30 != 0:
+        goal_x = int(input("What is the x value of the goal location(range 0-399)? "))
+        goal_y = int(input("What is the y value of the goal location(range 0-249)? "))
+        goal_a = int(input("What is the orientation value of the goal location(in increments of 30) ? "))
+    goal_location = [goal_y,goal_x,goal_a]
+    step = 5
+
+    while step not in range(1,11):
+        step = int(input("What is the step sizxe (range 1-10)?"))
+
+    width = 400
+    height = 250
+
+    thresh = -1
+    while thresh <= 0:
+        thresh = float(input("What is the node threshold? "))
 
     print('Building Color Map')
     color_map = create_color_map(height = 250, width = 400, radius=15)
