@@ -489,6 +489,8 @@ def animate(color_map, closed_nodes, solution_path, start, filename):
         if node.cell_location != start and node.parent.cell_location != start:
             parent_node = node.parent
             cv2.arrowedLine(color_map,(int(parent_node.cell_location[1]-1),int(parent_node.cell_location[0]-1)),(int(node.cell_location[1]),int(node.cell_location[0])),[255,255,255],1,tipLength = 0.5)
+            cv2.line(color_map,(int(node.cell_location[1]),int(node.cell_location[0])),(int(parent_node.cell_location[1]),int(parent_node.cell_location[0])),[0,255,255],1)
+
         out.write(np.flipud(color_map))
 
         
