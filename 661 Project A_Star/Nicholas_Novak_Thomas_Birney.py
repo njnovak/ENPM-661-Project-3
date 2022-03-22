@@ -479,14 +479,18 @@ def get_solution_path(curr_node):
 
 # use cv2 in order to draw how the node 
 # traversal looks as well as plot the shortest path
-def animate(color_map, closed_nodes, solution_path, start, filename):
+def animate(color_map, closed_nodes,open_nodes, solution_path, start, filename):
     out = cv2.VideoWriter(f'{filename}.avi',cv2.VideoWriter_fourcc(*'DIVX'), 60, (400, 250))
- 
-    updating_map = np.copy(color_map)
-    for node in closed_nodes:
-
+    
+    full_list = open_nodes+closed_nodes
+    full_list.sort(key = lambda x: x.h)
+    full_list.reverse()
+    # updating_map = np.copy(color_map)
+    for node in full_list:
+        print("here")
         # new_map = np.flipud(update_color_map(node, color_map, [255, 255, 255]))
         if node.cell_location != start and node.parent.cell_location != start:
+            print("node ",node.cell_location)
             parent_node = node.parent
             cv2.arrowedLine(color_map,(int(parent_node.cell_location[1]-1),int(parent_node.cell_location[0]-1)),(int(node.cell_location[1]),int(node.cell_location[0])),[255,255,255],1,tipLength = 0.5)
             cv2.line(color_map,(int(node.cell_location[1]),int(node.cell_location[0])),(int(parent_node.cell_location[1]),int(parent_node.cell_location[0])),[0,255,255],1)
@@ -649,11 +653,12 @@ def main():
     print('Animating Search Pattern')          
     # back track and animate the search and solution
     solution_path = get_solution_path(curr_node)
-    animate(color_map, closed_nodes, solution_path, start_location, filename='search')
+    animate(color_map, closed_nodes,open_nodes, solution_path, start_location, filename='search')
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except:
-        pass
+    main()
+    # try:
+    #     main()
+    # except:
+    #     pass
