@@ -1,20 +1,19 @@
 Instructions:
 
-To run this program, simply run the main.py file, making usre all libraries are installed.
+To run this program, simply run the .py file, making sure all libraries are installed.
 
-Next, enter the collision radius, the starting x and y points, and the ending x and y points. The file will produce an avi movie that will
-show the exploration and pathing actions within it. Commenting out the line with "cv2.imshow()" and "cv2.waitKey()"
-in it will also display this at the end of the program.
+Next, the starting x and y points, and the ending x and y points, the step length and the threshold. The file will produce an avi movie that will
+show the exploration and pathing actions within it.
 
 Common error resolutions:
-Make sure the collision radius is not too big and that the points lie within a 400-x and 250-y box.
+Make sure the threshold is not too big.
 
 If the program does not stop running, try quitting and restarting the program.
 
 Any other inquires can be sent to nnovak@umd.edu
 
-Operation can be seen at: https://youtu.be/pYcHBddxeaA or in the included default_path.avi file
+Operation can be seen at: https://youtu.be/iWS37WGNSdA or in the included default_path.avi file
 
-Code can be found at: https://github.com/njnovak/661-Project-2
+Code can be found at: https://github.com/njnovak/ENPM-661-Project-3
 
 See each file's comments for further explanations
