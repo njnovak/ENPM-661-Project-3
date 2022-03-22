@@ -482,9 +482,10 @@ def get_solution_path(curr_node):
 def animate(color_map, closed_nodes, solution_path, start, filename):
     out = cv2.VideoWriter(f'{filename}.avi',cv2.VideoWriter_fourcc(*'DIVX'), 60, (400, 250))
  
-    base_map = np.copy(color_map)
     updating_map = np.copy(color_map)
     for node in closed_nodes:
+        base_map = np.copy(color_map)
+
         # new_map = np.flipud(update_color_map(node, color_map, [255, 255, 255]))
         if node.cell_location != start and node.parent.cell_location != start:
             parent_node = node.parent
