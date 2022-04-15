@@ -1,2 +1,0 @@
-    cv2.arrowedLine(base_map,(int(parent_node.cell_location[1]-1),int(parent_node.cell_location[0]-1)),(int(node.cell_location[1]),int(node.cell_location[0])),[255,255,255],1,tipLength = 0.5)
-                cv2
