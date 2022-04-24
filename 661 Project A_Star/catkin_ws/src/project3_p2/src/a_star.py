@@ -423,7 +423,6 @@ plt.figure(figsize=(10, 10))
 plt.imshow(color_map, origin='lower')
 
 
-
 compressed_x_start, compressed_y_start, compressed_angle_start = compress_coordinates(
         start_location[1],
         start_location[0],
@@ -438,9 +437,9 @@ compressed_x_goal, compressed_y_goal, compressed_angle_goal = compress_coordinat
     thresh=thresh
 )
 
+
 print(f'Starting in region x: {compressed_x_start}, y: {compressed_y_start}, theta: {compressed_angle_start}')
 print(f'Goal in region x: {compressed_x_goal}, y: {compressed_y_goal}, theta: {compressed_angle_goal}')
-
 
 
 start_node = board[compressed_y_start][compressed_x_start][compressed_angle_start]
@@ -515,11 +514,46 @@ if not found:
     print('No Solution')
 
 
-plt.figure(figsize=(10, 10))
-plt.imshow(color_map, origin = "bottom")
+
+import rospy
+from geometry_msgs.msg import Twist
+import math
+
+def calc_vels(scaled_command, prev_theta):
+    rospy.init_node('a_star_turtle')
+    cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+
+    dot_x = (r/L)*(scaled_command[0] + scaled_command[1])*math.cos(prev_theta*math.pi/180)
+    dot_theta = (r/L)*(scaled_command[1]-scaled_command[0])
+    
+    move_cmd = Twist()
+    move_cmd.angular.x = dot_x
+    move_cmd.angular.z = dot_theta
+
+    cmd_vel.publish(move_cmd)
+    rospy.sleep(1)
+
+    
+# set all veocities out to 0
+def stop_bot():
+    cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+    move_cmd = Twist()
+    move_cmd.linear.x = 0
+    move_cmd.angular.z = 0
+    cmd_vel.publish(move_cmd)
 
 
-len(commands)
+# this loop skips the first node which has no command,
+# but does have the previous theta which we need
+# scale doen the angular velocities, to map form board coordinates to gazebo coordinates
+for node in solution_path:
+    theta = node.cell_location[2]
+    if node.command:
+        scaled_command = [node.command[0]/20, node.command[1]/20]
+        calc_vels(scaled_command, theta)
+
+stop_bot()
+
 
 
 
