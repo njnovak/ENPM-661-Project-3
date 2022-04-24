@@ -1,0 +1,2 @@
+set(turtlebot3_msgs_MESSAGE_FILES "/home/tom/Documents/Classes/ENPM_661/Project_3/ENPM-661-Project-3/661_Project_A_Star/catkin_ws/src/turtlebot3_msgs/msg/SensorState.msg;/home/tom/Documents/Classes/ENPM_661/Project_3/ENPM-661-Project-3/661_Project_A_Star/catkin_ws/src/turtlebot3_msgs/msg/VersionInfo.msg;/home/tom/Documents/Classes/ENPM_661/Project_3/ENPM-661-Project-3/661_Project_A_Star/catkin_ws/src/turtlebot3_msgs/msg/Sound.msg")
+set(turtlebot3_msgs_SERVICE_FILES "")
