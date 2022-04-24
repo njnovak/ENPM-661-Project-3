@@ -1,3 +1,4 @@
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -6,6 +7,10 @@ import cv2
 from cv2 import VideoWriter, VideoWriter_fourcc
 import sys
 import math
+
+
+r = 0.033*20
+L = 0.35*20
 
 
 # node class that each spot in the map will occupy
@@ -94,7 +99,7 @@ def generate_margin(color_map, radius):
 
                     y_range = np.arange(y_lower_limit, y_upper_limit+1)
                     for y_i in y_range:
-                        if (x_i >= 0 and x_i <= width) and (y_i >= 0 and y_i <= height):
+                        if (x_i >= 0 and x_i < width) and (y_i >= 0 and y_i < height):
                             if not (color_map[int(y_i)][x_i][0] == [255] and 
                                     color_map[int(y_i)][x_i][1] == [0] and 
                                     color_map[int(y_i)][x_i][2] == [0]):
@@ -118,7 +123,7 @@ def expand_goal(color_map, goal_location, radius):
 
         y_range = np.arange(y_lower_limit, y_upper_limit+1)
         for y_i in y_range:
-            if (x_i >= 0 and x_i <= width) and (y_i >= 0 and y_i <= height):
+            if (x_i >= 0 and x_i < width) and (y_i >= 0 and y_i < height):
                 if not (int(color_map[int(y_i)][int(x_i)][0]) == 255 or\
                        int(color_map[int(y_i)][int(x_i)][1]) == 255):
                     color_map[int(y_i)][int(x_i)] = [0,0,255]
@@ -219,9 +224,8 @@ def generate_curve(x,y,theta,UL,UR):
 
     # robot parameters
     t = 0
-    r = 5
-    L = 50
-    dt = 0.05
+    
+    dt = 0.1
     cost=0
 
 
@@ -249,6 +253,8 @@ def generate_curve(x,y,theta,UL,UR):
     # retrun the x and ys to be plotted as well as the end theta, and cost of the curve 
     return x_res, y_res, theta, cost
     
+
+
 
 # uses the predefined differential commands to generate the arc of the robots path
 # for each point in the arc, check bounds and if in opstacle or margin, and disqualify arcs which contain invalid points
@@ -323,6 +329,9 @@ def gen_next_nodes(curr_node, color_map, board, goal_location, thresh):
     return next_nodes
 
     
+    
+
+
 # this is the backtracking function
 # returns a list of nodes in order to find the solution
 def get_solution_path(curr_node):
@@ -395,13 +404,14 @@ def validate_inputs(height, width, start_location, goal_location, color_map):
 
 # starting paramters
 start_location = [0,0,0]
-goal_location = [150,150,0]
+goal_location = [25,150,0]
 
+# color map size
+# board size will be based off of the color map and threshold
 width = 200
 height = 200
 
-step = 3
-thresh = 1
+thresh = 1.5
 
 print('Building Color Map')
 color_map = create_color_map(height = height, width = width, radius=15, goal_location=goal_location)
@@ -504,7 +514,14 @@ while len(open_nodes) > 0:
 if not found:
     print('No Solution')
 
+
 plt.figure(figsize=(10, 10))
 plt.imshow(color_map, origin = "bottom")
+
+
+len(commands)
+
+
+
 
 
