@@ -149,8 +149,8 @@ def create_color_map(height, width, radius, goal_location):
                 color_map[row][col][1] = 0
                 color_map[row][col][2] = 0
 
-    # color_map = expand_goal(color_map, goal_location, 2)
-    color_map = generate_margin(color_map, 2)
+    color_map = expand_goal(color_map, goal_location, 2)
+    color_map = generate_margin(color_map, radius)
 
     return color_map
 
@@ -260,7 +260,7 @@ def generate_curve(x,y,theta,UL,UR):
 # uses the predefined differential commands to generate the arc of the robots path
 # for each point in the arc, check bounds and if in opstacle or margin, and disqualify arcs which contain invalid points
 # if arc is valid then pull the node it ends on compare costs, and if cheaper, then update the cost and local path to the node
-def gen_next_nodes(curr_node, color_map, board, goal_location, thresh):
+def gen_next_nodes(curr_node, color_map, board, goal_location, thresh, rpms):
 
     curr_y = curr_node.cell_location[0]
     curr_x = curr_node.cell_location[1]
@@ -269,6 +269,16 @@ def gen_next_nodes(curr_node, color_map, board, goal_location, thresh):
     next_nodes = []
 
     actions=[[7, 3], [10, 0], [5, 5], [0,10], [3, 7]]
+    # actions = [
+    #     [rpms[0], 0],
+    #     [0, rpms[0]],
+    #     [rpms[0], rpms[0]],
+    #     [rpms[1], 0],
+    #     [0, rpms[1]],
+    #     [rpms[1], rpms[1]],
+    #     [rpms[0], rpms[1]],
+    #     [rpms[1], rpms[0]]
+    # ]
 
     for action in actions:
 
@@ -354,7 +364,7 @@ def get_commands(solution_path):
 def animate(color_map, closed_nodes, solution_path):
 
     # draw explored nodes
-    out = cv2.VideoWriter('test.avi',cv2.VideoWriter_fourcc(*'DIVX'), 60, (400, 250))
+    out = cv2.VideoWriter('test.avi',cv2.VideoWriter_fourcc(*'DIVX'), 60, (200, 200))
     for node in closed_nodes[1:]:
         xs = node.local_path[0]
         ys = node.local_path[1]
@@ -376,32 +386,14 @@ def animate(color_map, closed_nodes, solution_path):
     out.release()
 
 
-# make sure that the user defined paramters are fine
-# not out of bounds and is a free space for start and goal
-
-def validate_inputs(height, width, start_location, goal_location, color_map):
-    if start_location[0] not in range(0, height) or start_location[1] not in range(0, width):
-        print("Start Location Out Of Bounds")
-        return False
-
-    if goal_location[0] not in range(0, height) or goal_location[1] not in range(0, width):
-        print("Goal Location Out Of Bounds")
-        return False
-
-    if color_map[start_location[0]][start_location[1]][0] == 255 or color_map[start_location[0]][start_location[1]][1] == 255:
-        print('Cannot start in obstacle or obstacle margin')
-        return False
-
-    if color_map[goal_location[0]][goal_location[1]][0] == 255 or color_map[goal_location[0]][goal_location[1]][1] == 255:
-        print('Cannot place goal in obstacle or obstacle margin')
-        return False
-
-    return True
-
-
 # starting paramters
 start_location = [5,5,0]
 goal_location = [75,125,0]
+
+# robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
+clearance = 1
+rpms = [3, 7]
+
 
 # color map size
 # board size will be based off of the color map and threshold
@@ -410,7 +402,7 @@ height = 200
 thresh = 2
 
 print('Building Color Map')
-color_map = create_color_map(height = height, width = width, radius=15, goal_location=goal_location)
+color_map = create_color_map(height = height, width = width, radius=4 + clearance, goal_location=goal_location)
 
 print('Building Board')
 board = create_board(width=width, height=height, thresh=thresh)
@@ -467,10 +459,10 @@ while len(open_nodes) > 0:
     # print(f"Current node has coordinates of {curr_node.cell_location}")
 
 
-    # if int(color_map[int(curr_y)][int(curr_x)][0]) == 0 and\
-    #    int(color_map[int(curr_y)][int(curr_x)][1]) == 0 and\
-    #    int(color_map[int(curr_y)][int(curr_x)][2]) == 255:
-    if curr_node.region[:2] == goal_node.region[:2]:
+    if int(color_map[int(curr_y)][int(curr_x)][0]) == 0 and\
+       int(color_map[int(curr_y)][int(curr_x)][1]) == 0 and\
+       int(color_map[int(curr_y)][int(curr_x)][2]) == 255:
+    # if curr_node.region[:2] == goal_node.region[:2]:
         print('Found Solution')
         found = True
 
@@ -488,7 +480,8 @@ while len(open_nodes) > 0:
             board=board,
             goal_location=goal_location,
             color_map=color_map,
-            thresh=thresh
+            thresh=thresh,
+            rpms = rpms
         )
         
         for node in next_possible_nodes:
@@ -521,7 +514,7 @@ def calc_vels(command, theta, d):
     cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
     rate = rospy.Rate(1)
 
-    # dot_x = (r/(2*20))*(command[0] + command[1])*math.cos(theta)
+    dot_x = (r/(2*20))*(command[0] + command[1])*math.cos(theta)
     dot_x = d/20
     dot_theta = (r/L)*(command[1]-command[0])
     print(f"X_d: {dot_x}, Th_d: {dot_theta}")
