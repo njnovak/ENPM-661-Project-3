@@ -9,8 +9,8 @@ import sys
 import math
 
 
-r = 0.033*20
-L = 0.35*20
+r = 0.038*20
+L = 0.354*20
 
 
 # node class that each spot in the map will occupy
@@ -149,9 +149,8 @@ def create_color_map(height, width, radius, goal_location):
                 color_map[row][col][1] = 0
                 color_map[row][col][2] = 0
 
-    color_map = expand_goal(color_map, goal_location, 5)
+    # color_map = expand_goal(color_map, goal_location, 2)
     color_map = generate_margin(color_map, 2)
-
 
     return color_map
 
@@ -162,7 +161,9 @@ def create_color_map(height, width, radius, goal_location):
 def compress_coordinates(x, y, theta, thresh):
     compressed_x = int(np.floor(x/thresh))
     compressed_y = int(np.floor(y/thresh))
-    compressed_angle = 0 if theta == 0 else (int(np.floor(360/theta))-1)%12
+
+    theta = theta % 360
+    compressed_angle = (int(np.floor(theta/30)))%11
 
     return compressed_x, compressed_y, compressed_angle
 
@@ -195,7 +196,7 @@ def create_board(width, height, thresh):
         for col_num in range(0, compressed_width):
 
             temp_configuration = []
-            for angle in range(0,compressed_angle+1):
+            for angle in range(0,12):
 
                 c2c = np.Infinity
                 c2g = np.Infinity
@@ -205,10 +206,10 @@ def create_board(width, height, thresh):
                 new_node = Node(parent=None, 
                                 c2c=c2c,
                                 c2g=c2g,
-                                cell_location=[int(row_num*thresh), int(col_num*thresh), angle],
+                                cell_location=[int(row_num*thresh), int(col_num*thresh), angle*30],
                                 region=[row_num, col_num, angle],
                                 local_path=[],
-                                command = None)
+                                command = [0,0])
 
                 temp_configuration.append(new_node)
             temp_row.append(temp_configuration)
@@ -225,8 +226,8 @@ def generate_curve(x,y,theta,UL,UR):
     # robot parameters
     t = 0
     
-    dt = 0.1
-    cost=0
+    dt = 0.05
+    cost= 0
 
 
     # list of x and y values
@@ -259,7 +260,6 @@ def generate_curve(x,y,theta,UL,UR):
 # uses the predefined differential commands to generate the arc of the robots path
 # for each point in the arc, check bounds and if in opstacle or margin, and disqualify arcs which contain invalid points
 # if arc is valid then pull the node it ends on compare costs, and if cheaper, then update the cost and local path to the node
-
 def gen_next_nodes(curr_node, color_map, board, goal_location, thresh):
 
     curr_y = curr_node.cell_location[0]
@@ -269,6 +269,7 @@ def gen_next_nodes(curr_node, color_map, board, goal_location, thresh):
     next_nodes = []
 
     actions=[[7, 3], [10, 0], [5, 5], [0,10], [3, 7]]
+
     for action in actions:
 
         x_res, y_res, theta, cost = generate_curve(curr_x, curr_y, curr_angle, action[0], action[1])
@@ -283,7 +284,7 @@ def gen_next_nodes(curr_node, color_map, board, goal_location, thresh):
             if int(y) < 0 or int(y) > 249:
                 valid = False
 
-
+        # obstacle or margin checking
         if valid:
             for i in range(len(x_res)):
                 if int(color_map[int(y_res[i])][int(x_res[i])][0]) == 255 and\
@@ -328,9 +329,6 @@ def gen_next_nodes(curr_node, color_map, board, goal_location, thresh):
 
     return next_nodes
 
-    
-    
-
 
 # this is the backtracking function
 # returns a list of nodes in order to find the solution
@@ -353,7 +351,6 @@ def get_commands(solution_path):
 
 
 # plot the chronologically ordered list of nodes in closed nodes, and then generate and plot the path for the solution
-
 def animate(color_map, closed_nodes, solution_path):
 
     # draw explored nodes
@@ -403,15 +400,14 @@ def validate_inputs(height, width, start_location, goal_location, color_map):
 
 
 # starting paramters
-start_location = [0,0,0]
-goal_location = [100,50,0]
+start_location = [5,5,0]
+goal_location = [75,125,0]
 
 # color map size
 # board size will be based off of the color map and threshold
 width = 200
 height = 200
-
-thresh = 1.5
+thresh = 2
 
 print('Building Color Map')
 color_map = create_color_map(height = height, width = width, radius=15, goal_location=goal_location)
@@ -471,9 +467,10 @@ while len(open_nodes) > 0:
     # print(f"Current node has coordinates of {curr_node.cell_location}")
 
 
-    if int(color_map[int(curr_y)][int(curr_x)][0]) == 0 and\
-       int(color_map[int(curr_y)][int(curr_x)][1]) == 0 and\
-       int(color_map[int(curr_y)][int(curr_x)][2]) == 255:
+    # if int(color_map[int(curr_y)][int(curr_x)][0]) == 0 and\
+    #    int(color_map[int(curr_y)][int(curr_x)][1]) == 0 and\
+    #    int(color_map[int(curr_y)][int(curr_x)][2]) == 255:
+    if curr_node.region[:2] == goal_node.region[:2]:
         print('Found Solution')
         found = True
 
@@ -513,25 +510,28 @@ while len(open_nodes) > 0:
 if not found:
     print('No Solution')
 
-
+plt.imsave('test.jpg', np.flipud(color_map))
 
 import rospy
 from geometry_msgs.msg import Twist
 import math
 
-def calc_vels(scaled_command, prev_theta):
+def calc_vels(command, theta, d):
     rospy.init_node('a_star_turtle')
     cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+    rate = rospy.Rate(1)
 
-    dot_x = (r/(2*20))*(scaled_command[0] + scaled_command[1])*math.cos(prev_theta*math.pi/180)
-    dot_theta = (r/(L*20))*(scaled_command[1]-scaled_command[0])
-    
+    # dot_x = (r/(2*20))*(command[0] + command[1])*math.cos(theta)
+    dot_x = d/20
+    dot_theta = (r/L)*(command[1]-command[0])
+    print(f"X_d: {dot_x}, Th_d: {dot_theta}")
+
     move_cmd = Twist()
     move_cmd.linear.x = dot_x
     move_cmd.angular.z = dot_theta
 
     cmd_vel.publish(move_cmd)
-    rospy.sleep(1)
+    rate.sleep()
 
     
 # set all veocities out to 0
@@ -546,12 +546,19 @@ def stop_bot():
 # this loop skips the first node which has no command,
 # but does have the previous theta which we need
 # scale doen the angular velocities, to map form board coordinates to gazebo coordinates
+prev_cost = 0
 for node in solution_path:
-    theta = node.cell_location[2]
-    if node.command:
-        scaled_command = [node.command[0], node.command[1]]
-        calc_vels(scaled_command, theta)
+    print(node.cell_location)
 
+    if not node.command:
+        com = [0,0]
+    else:
+        com = [node.command[0], node.command[1]]
+    
+    theta = node.cell_location[2]*math.pi/180
+    d = node.c2c - prev_cost
+    calc_vels(com, theta, d)
+    prev_cost = node.c2c
 stop_bot()
 
 
