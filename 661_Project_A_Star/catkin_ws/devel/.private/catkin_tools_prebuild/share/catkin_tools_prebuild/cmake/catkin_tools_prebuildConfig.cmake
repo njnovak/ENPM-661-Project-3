@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/tom/Documents/Classes/ENPM_661/Project_3/ENPM-661-Project-3/661_Project_A_Star/catkin_ws/devel/.private/catkin_tools_prebuild/lib;/home/tom/catkin_ws/devel/lib;/home/tom/Documents/Classes/ENPM_661/ws_moveit/devel/lib;/home/tom/ws_moveit/devel/lib;/opt/ros/noetic/lib)
+    foreach(path /home/tom/Documents/Classes/ENPM_661/Project_3/ENPM-661-Project-3/661_Project_A_Star/catkin_ws/devel/.private/catkin_tools_prebuild/lib;/home/tom/Documents/Classes/ENPM_661/Project_3/ENPM-661-Project-3/661_Project_A_Star/catkin_ws/devel/lib;/home/tom/catkin_ws/devel/lib;/home/tom/Documents/Classes/ENPM_661/ws_moveit/devel/lib;/home/tom/ws_moveit/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
