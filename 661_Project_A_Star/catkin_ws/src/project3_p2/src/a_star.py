@@ -388,7 +388,7 @@ def animate(color_map, closed_nodes, solution_path):
 
 # starting paramters
 start_location = [5,5,0]
-goal_location = [75,125,0]
+goal_location = [75,120,0]
 
 # robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
 clearance = 1
