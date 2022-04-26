@@ -268,7 +268,7 @@ def gen_next_nodes(curr_node, color_map, board, goal_location, thresh, rpms):
 
     next_nodes = []
 
-    actions=[[7, 3], [10, 0], [5, 5], [0,10], [3, 7]]
+    actions=[[10, 6], [10, 0], [5, 5], [0,10], [6, 10]]
     # actions = [
     #     [rpms[0], 0],
     #     [0, rpms[0]],
@@ -388,10 +388,10 @@ def animate(color_map, closed_nodes, solution_path):
 
 # starting paramters
 start_location = [5,5,0]
-goal_location = [75,120,0]
+goal_location = [120,180,0]
 
 # robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
-clearance = 1
+clearance = 2
 rpms = [3, 7]
 
 
@@ -469,8 +469,8 @@ while len(open_nodes) > 0:
         print('Animating Search Pattern')          
         # back track and animate the search and solution
         solution_path = get_solution_path(curr_node)
-        commands = get_commands(solution_path)
-        animate(color_map, closed_nodes, solution_path)
+        # commands = get_commands(solution_path)
+        # animate(color_map, closed_nodes, solution_path)
 
         break
 
@@ -512,19 +512,21 @@ import math
 def calc_vels(command, theta, d):
     rospy.init_node('a_star_turtle')
     cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    rate = rospy.Rate(1)
 
-    dot_x = (r/(2*20))*(command[0] + command[1])*math.cos(theta)
-    dot_x = d/20
-    dot_theta = (r/L)*(command[1]-command[0])
-    print(f"X_d: {dot_x}, Th_d: {dot_theta}")
+    for i in range(50):
+        rate = rospy.Rate(50)
 
-    move_cmd = Twist()
-    move_cmd.linear.x = dot_x
-    move_cmd.angular.z = dot_theta
+        dot_x = (r/(2*20))*(command[0] + command[1])*math.cos(theta)
+        dot_x = d/20
+        dot_theta = (r/L)*(command[1]-command[0])
+        print(f"X_d: {dot_x}, Th_d: {dot_theta}")
 
-    cmd_vel.publish(move_cmd)
-    rate.sleep()
+        move_cmd = Twist()
+        move_cmd.linear.x = dot_x
+        move_cmd.angular.z = dot_theta
+
+        cmd_vel.publish(move_cmd)
+        rate.sleep()
 
     
 # set all veocities out to 0
@@ -553,7 +555,6 @@ for node in solution_path:
     calc_vels(com, theta, d)
     prev_cost = node.c2c
 stop_bot()
-
 
 
 
