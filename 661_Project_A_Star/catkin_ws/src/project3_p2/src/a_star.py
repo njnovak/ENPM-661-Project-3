@@ -501,19 +501,23 @@ import rospy
 from geometry_msgs.msg import Twist
 import math
 
-def calc_vels(command, theta, d):
+def calc_vels(command):
     rospy.init_node('a_star_turtle')
     cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
     rate = rospy.Rate(10)
+
+    rads_per_s = ((command[0]) + (command[1]))/2
+    d_lin = r*rads_per_s/20
+
+    d_theta = (r/L)*(command[1]-command[0])
+
     for num in range(10):
-        dot_x = d/20
-        dot_theta = (r/L)*(command[1]-command[0])
-        print(f"X_d: {dot_x}, Th_d: {dot_theta}")
+        print(f"X_d: {d_lin}, Th_d: {d_theta}")
 
 
         move_cmd = Twist()
-        move_cmd.linear.x = dot_x
-        move_cmd.angular.z = dot_theta
+        move_cmd.linear.x = d_lin
+        move_cmd.angular.z = d_theta
 
         cmd_vel.publish(move_cmd)
         rate.sleep()
@@ -533,15 +537,7 @@ def stop_bot():
 # scale doen the angular velocities, to map form board coordinates to gazebo coordinates
 prev_cost = 0
 for node in solution_path:
-    print(node.cell_location)
-
-    if not node.command:
-        com = [0,0]
-    else:
-        com = [node.command[0], node.command[1]]
     
-    theta = node.cell_location[2]*math.pi/180
-    d = node.c2c - prev_cost
-    calc_vels(com, theta, d)
+    calc_vels(node.command)
     prev_cost = node.c2c
 stop_bot()
