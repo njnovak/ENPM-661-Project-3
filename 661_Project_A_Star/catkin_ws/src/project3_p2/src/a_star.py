@@ -269,7 +269,7 @@ def gen_next_nodes(curr_node, color_map, board, goal_location, thresh, rpms):
 
     next_nodes = []
 
-    actions=[[10, 6], [10, 0], [5, 5], [0,10], [6, 10]]
+    actions=[[10, 8], [10,2], [7, 7], [2,10], [8, 10]]
     # actions = [
     #     [rpms[0], 0],
     #     [0, rpms[0]],
@@ -388,11 +388,11 @@ def animate(color_map, closed_nodes, solution_path):
 
 
 # starting paramters
-start_location = [5,5,0]
+start_location = [0,0,0]
 goal_location = [75,120,0]
 
 # robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
-clearance = 1
+clearance = 4
 rpms = [3, 7]
 
 
@@ -400,7 +400,7 @@ rpms = [3, 7]
 # board size will be based off of the color map and threshold
 width = 200
 height = 200
-thresh = 2
+thresh = 1
 
 print('Building Color Map')
 color_map = create_color_map(height = height, width = width, radius=4 + clearance, goal_location=goal_location)
@@ -513,9 +513,8 @@ import math
 def calc_vels(command, theta, d):
     rospy.init_node('a_star_turtle')
     cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    rate = rospy.Rate(50)
-    for num in range(50):
-        dot_x = (r/(2*20))*(command[0] + command[1])*math.cos(theta)
+    rate = rospy.Rate(10)
+    for num in range(10):
         dot_x = d/20
         dot_theta = (r/L)*(command[1]-command[0])
         print(f"X_d: {dot_x}, Th_d: {dot_theta}")
