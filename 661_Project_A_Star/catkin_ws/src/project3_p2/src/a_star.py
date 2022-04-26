@@ -269,22 +269,13 @@ def gen_next_nodes(curr_node, color_map, board, goal_location, thresh, rpms):
 
     next_nodes = []
 
-    actions=[[10, 8], [10,2], [7, 7], [2,10], [8, 10]]
-    # actions = [
-    #     [rpms[0], 0],
-    #     [0, rpms[0]],
-    #     [rpms[0], rpms[0]],
-    #     [rpms[1], 0],
-    #     [0, rpms[1]],
-    #     [rpms[1], rpms[1]],
-    #     [rpms[0], rpms[1]],
-    #     [rpms[1], rpms[0]]
-    # ]
+    actions=[[9, 7], [10,3], [7, 7], [3,10], [7, 9]]
+
 
     for action in actions:
 
         x_res, y_res, theta, cost = generate_curve(curr_x, curr_y, curr_angle, action[0], action[1])
-
+        
         valid = True
 
         # bounds checking
@@ -388,7 +379,7 @@ def animate(color_map, closed_nodes, solution_path):
 
 
 # starting paramters
-start_location = [0,0,0]
+start_location = [5,5,0]
 goal_location = [75,120,0]
 
 # robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
