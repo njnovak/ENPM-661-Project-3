@@ -380,7 +380,7 @@ def animate(color_map, closed_nodes, solution_path):
 
 # starting paramters
 start_location = [5,5,0]
-goal_location = [75,120,0]
+goal_location = [120,180,0]
 
 # robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
 clearance = 4
@@ -535,9 +535,7 @@ def stop_bot():
 # this loop skips the first node which has no command,
 # but does have the previous theta which we need
 # scale doen the angular velocities, to map form board coordinates to gazebo coordinates
-prev_cost = 0
 for node in solution_path:
-    
     calc_vels(node.command)
-    prev_cost = node.c2c
+
 stop_bot()
