@@ -25,6 +25,8 @@ goal_theta = 0
 If you choose to do a far away goal point, I recommend commenting out the animate 
 function call to speed up execution
 
+In the submission_video.mp4, skip to 3:45 if you want to see the robot move
+
 The accuracy of the robot in the gazebo model depends on different goal points, but overall it can maneuvre to different spots. 
 Any other inquires can be sent to tbirney@umd.edu
 Operation can be seen in the included gazebo_sim.mkv file
