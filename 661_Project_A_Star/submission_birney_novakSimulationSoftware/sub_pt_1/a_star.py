@@ -377,21 +377,56 @@ def animate(color_map, closed_nodes, solution_path):
 
     out.release()
 
+# get the start and end locations bounded by board size.
+# does not check for obstacles and margin
+def get_inputs():
+    start_x = int(float(input('What is your start x coordinate in meters [0, 10)'))*20)
+    if start_x not in range(0, 200):
+        start_x = int(float(input('What is your start x coordinate in meters [0, 10)'))*20)
+    
+    start_y = int(float(input('What is your start y coordinate in meters [0, 10)'))*20)
+    if start_y not in range(0, 200):
+        start_y = int(float(input('What is your start y coordinate in meters [0, 10)'))*20)
 
-# starting paramters
-start_location = [5,5,0]
-goal_location = [120,180,0]
+    start_theta = float(input('What is your start theta in degrees'))%365
 
-# robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
-clearance = 4
-rpms = [3, 7]
+    start_location = [start_y, start_x, start_theta]
 
 
+    goal_x = int(float(input('What is your goal x coordinate in meters [0, 10)'))*20)
+    if goal_x not in range(0, 200):
+        goal_x = int(float(input('What is your goal x coordinate in meters [0, 10)'))*20)
+    
+    goal_y = int(float(input('What is your goal y coordinate in meters [0, 10)'))*20)
+    if goal_y not in range(0, 200):
+        goal_y = int(float(input('What is your goal y coordinate in meters [0, 10)'))*20)
+
+    goal_theta = float(input('What is your goal theta in degrees'))%365
+    
+    goal_location = [goal_y, goal_x, goal_theta]
+
+    return start_location, goal_location
+
+
+
+
+rpms = [] # useless
 # color map size
 # board size will be based off of the color map and threshold
 width = 200
 height = 200
 thresh = 1
+
+# robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
+clearance = 4
+clearance = int(float(input("What is your clearance in meters: 0.2 is default"))*20)
+while clearance not in range(0, height):
+    clearance = int(float(input("What is your clearance in meters: 0.2 is default"))*20)
+
+
+# starting paramters
+start_location, goal_location = get_inputs()
+
 
 print('Building Color Map')
 color_map = create_color_map(height = height, width = width, radius=4 + clearance, goal_location=goal_location)
@@ -401,7 +436,6 @@ board = create_board(width=width, height=height, thresh=thresh)
 
 plt.figure(figsize=(10, 10))
 plt.imshow(color_map, origin='lower')
-
 
 compressed_x_start, compressed_y_start, compressed_angle_start = compress_coordinates(
         start_location[1],
@@ -495,7 +529,7 @@ while len(open_nodes) > 0:
 if not found:
     print('No Solution')
 
-plt.imsave('test.jpg', np.flipud(color_map))
+# plt.imsave('test.jpg', np.flipud(color_map))
 
 import rospy
 from geometry_msgs.msg import Twist
@@ -513,7 +547,6 @@ def calc_vels(command):
 
     for num in range(10):
         print(f"X_d: {d_lin}, Th_d: {d_theta}")
-
 
         move_cmd = Twist()
         move_cmd.linear.x = d_lin
@@ -535,7 +568,7 @@ def stop_bot():
 # this loop skips the first node which has no command,
 # but does have the previous theta which we need
 # scale doen the angular velocities, to map form board coordinates to gazebo coordinates
-for node in solution_path:
-    calc_vels(node.command)
+# for node in solution_path:
+#     calc_vels(node.command)
 
-stop_bot()
+# stop_bot()

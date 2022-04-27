@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -268,22 +269,13 @@ def gen_next_nodes(curr_node, color_map, board, goal_location, thresh, rpms):
 
     next_nodes = []
 
-    actions=[[7, 3], [10, 0], [5, 5], [0,10], [3, 7]]
-    # actions = [
-    #     [rpms[0], 0],
-    #     [0, rpms[0]],
-    #     [rpms[0], rpms[0]],
-    #     [rpms[1], 0],
-    #     [0, rpms[1]],
-    #     [rpms[1], rpms[1]],
-    #     [rpms[0], rpms[1]],
-    #     [rpms[1], rpms[0]]
-    # ]
+    actions=[[9, 7], [10,3], [7, 7], [3,10], [7, 9]]
+
 
     for action in actions:
 
         x_res, y_res, theta, cost = generate_curve(curr_x, curr_y, curr_angle, action[0], action[1])
-
+        
         valid = True
 
         # bounds checking
@@ -385,21 +377,45 @@ def animate(color_map, closed_nodes, solution_path):
 
     out.release()
 
+# get the start and end locations bounded by board size.
+# does not check for obstacles and margin
+def get_inputs():
 
-# starting paramters
-start_location = [5,5,0]
-goal_location = [75,120,0]
+    goal_x = int(float(input('What is your goal x coordinate in meters [0, 10)'))*20)
+    if goal_x not in range(0, 200):
+        goal_x = int(float(input('What is your goal x coordinate in meters [0, 10)'))*20)
+    
+    goal_y = int(float(input('What is your goal y coordinate in meters [0, 10)'))*20)
+    if goal_y not in range(0, 200):
+        goal_y = int(float(input('What is your goal y coordinate in meters [0, 10)'))*20)
 
-# robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
-clearance = 1
-rpms = [3, 7]
+    goal_theta = float(input('What is your goal theta in degrees'))%365
+    
+    goal_location = [goal_y, goal_x, goal_theta]
+
+    return goal_location
 
 
+
+
+rpms = [] # useless
 # color map size
 # board size will be based off of the color map and threshold
 width = 200
 height = 200
-thresh = 2
+thresh = 1
+
+# robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
+clearance = 4
+clearance = int(float(input("What is your clearance in meters: 0.2 is default"))*20)
+while clearance not in range(0, height):
+    clearance = int(float(input("What is your clearance in meters: 0.2 is default"))*20)
+
+
+# starting paramters
+start_location = [5, 5, 0]
+goal_location = get_inputs()
+
 
 print('Building Color Map')
 color_map = create_color_map(height = height, width = width, radius=4 + clearance, goal_location=goal_location)
@@ -409,7 +425,6 @@ board = create_board(width=width, height=height, thresh=thresh)
 
 plt.figure(figsize=(10, 10))
 plt.imshow(color_map, origin='lower')
-
 
 compressed_x_start, compressed_y_start, compressed_angle_start = compress_coordinates(
         start_location[1],
@@ -503,28 +518,32 @@ while len(open_nodes) > 0:
 if not found:
     print('No Solution')
 
-plt.imsave('test.jpg', np.flipud(color_map))
+# plt.imsave('test.jpg', np.flipud(color_map))
 
 import rospy
 from geometry_msgs.msg import Twist
 import math
 
-def calc_vels(command, theta, d):
+def calc_vels(command):
     rospy.init_node('a_star_turtle')
     cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    rate = rospy.Rate(1)
+    rate = rospy.Rate(10)
 
-    dot_x = (r/(2*20))*(command[0] + command[1])*math.cos(theta)
-    dot_x = d/20
-    dot_theta = (r/L)*(command[1]-command[0])
-    print(f"X_d: {dot_x}, Th_d: {dot_theta}")
+    rads_per_s = ((command[0]) + (command[1]))/2
+    d_lin = r*rads_per_s/20
 
-    move_cmd = Twist()
-    move_cmd.linear.x = dot_x
-    move_cmd.angular.z = dot_theta
+    d_theta = (r/L)*(command[1]-command[0])
 
-    cmd_vel.publish(move_cmd)
-    rate.sleep()
+    for num in range(10):
+        print(f"X_d: {d_lin}, Th_d: {d_theta}")
+
+
+        move_cmd = Twist()
+        move_cmd.linear.x = d_lin
+        move_cmd.angular.z = d_theta
+
+        cmd_vel.publish(move_cmd)
+        rate.sleep()
 
     
 # set all veocities out to 0
@@ -539,23 +558,7 @@ def stop_bot():
 # this loop skips the first node which has no command,
 # but does have the previous theta which we need
 # scale doen the angular velocities, to map form board coordinates to gazebo coordinates
-prev_cost = 0
 for node in solution_path:
-    print(node.cell_location)
+    calc_vels(node.command)
 
-    if not node.command:
-        com = [0,0]
-    else:
-        com = [node.command[0], node.command[1]]
-    
-    theta = node.cell_location[2]*math.pi/180
-    d = node.c2c - prev_cost
-    calc_vels(com, theta, d)
-    prev_cost = node.c2c
 stop_bot()
-
-
-
-
-
-
