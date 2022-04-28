@@ -10,8 +10,8 @@ import sys
 import math
 
 
-r = 0.038*20
-L = 0.354*20
+r = 0.038*40
+L = 0.354*40
 
 
 # node class that each spot in the map will occupy
@@ -52,26 +52,23 @@ def generate_line_eq(p1, p2):
 # hardcoded obstacles defined by their vertices and origins
 # we just see if the current x and y are within bounding lines
 def check_obstacle(x, y):
-    
-    # check bottom circle
-    if y <= 60 and y >= 20 and x <= np.sqrt(20**2 - (y-40)**2) + 40 and x >= -np.sqrt(20**2 - (y-40)**2) + 40:
+
+    # left block
+    if x >= 37 and x <= 43 and y >= 17 and y <= 23:
         return True
 
-    #check top circle
-    if y <= 180 and y >= 140 and x <= np.sqrt(20**2 - (y-160)**2) + 40 and x >= -np.sqrt(20**2 - (y-160)**2) + 40:
+    # up block
+    if x >= 57 and x <= 63 and y >= 8 and y <= 14:
         return True
 
-    # check left square
-    if x >= 5 and x <= 35 and y >= 85 and y <= 115:
+    # down block
+    if x >= 57 and x <= 63 and y >= 26 and y <= 32:
         return True
 
-    # check middle rectangle
-    if x >= 75 and x <= 125 and y >= 85 and y <= 115:
+    # right block
+    if x >= 77 and x <= 83 and y >= 17 and y <= 23:
         return True
 
-    # check right rectangle
-    if x >= 145 and x <= 175 and y >= 40 and y <= 80:
-        return True
     
 
     return False
@@ -263,6 +260,9 @@ def generate_curve(x,y,theta,UL,UR):
 # if arc is valid then pull the node it ends on compare costs, and if cheaper, then update the cost and local path to the node
 def gen_next_nodes(curr_node, color_map, board, goal_location, thresh, rpms):
 
+    height = len(color_map)
+    width = len(color_map[0])
+
     curr_y = curr_node.cell_location[0]
     curr_x = curr_node.cell_location[1]
     curr_angle = curr_node.cell_location[2]
@@ -280,10 +280,10 @@ def gen_next_nodes(curr_node, color_map, board, goal_location, thresh, rpms):
 
         # bounds checking
         for x in x_res:
-            if int(x) < 0 or int(x) > 399:
+            if int(x) < 0 or int(x) >= width:
                 valid = False
         for y in y_res:
-            if int(y) < 0 or int(y) > 249:
+            if int(y) < 0 or int(y) >= height:
                 valid = False
 
         # obstacle or margin checking
@@ -356,7 +356,7 @@ def get_commands(solution_path):
 def animate(color_map, closed_nodes, solution_path):
 
     # draw explored nodes
-    out = cv2.VideoWriter('test.avi',cv2.VideoWriter_fourcc(*'DIVX'), 60, (200, 200))
+    out = cv2.VideoWriter('test.avi',cv2.VideoWriter_fourcc(*'DIVX'), 60, (160, 40))
     for node in closed_nodes[1:]:
         xs = node.local_path[0]
         ys = node.local_path[1]
@@ -377,48 +377,24 @@ def animate(color_map, closed_nodes, solution_path):
 
     out.release()
 
-# get the start and end locations bounded by board size.
-# does not check for obstacles and margin
-def get_inputs():
-
-    goal_x = int(float(input('What is your goal x coordinate in meters [0, 10)'))*20)
-    if goal_x not in range(0, 200):
-        goal_x = int(float(input('What is your goal x coordinate in meters [0, 10)'))*20)
-    
-    goal_y = int(float(input('What is your goal y coordinate in meters [0, 10)'))*20)
-    if goal_y not in range(0, 200):
-        goal_y = int(float(input('What is your goal y coordinate in meters [0, 10)'))*20)
-
-    goal_theta = float(input('What is your goal theta in degrees'))%365
-    
-    goal_location = [goal_y, goal_x, goal_theta]
-
-    return goal_location
-
-
 
 
 rpms = [] # useless
 # color map size
 # board size will be based off of the color map and threshold
-width = 200
-height = 200
+width = 160
+height = 40
 thresh = 1
 
 # robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
-clearance = 4
-clearance = int(float(input("What is your clearance in meters: 0.2 is default"))*20)
-while clearance not in range(0, height):
-    clearance = int(float(input("What is your clearance in meters: 0.2 is default"))*20)
-
 
 # starting paramters
-start_location = [5, 5, 0]
-goal_location = get_inputs()
+start_location = [19, 0, 0]
+goal_location = [19, 159, 0]
 
 
 print('Building Color Map')
-color_map = create_color_map(height = height, width = width, radius=4 + clearance, goal_location=goal_location)
+color_map = create_color_map(height = height, width = width, radius= 3, goal_location=goal_location)
 
 print('Building Board')
 board = create_board(width=width, height=height, thresh=thresh)
@@ -518,7 +494,7 @@ while len(open_nodes) > 0:
 if not found:
     print('No Solution')
 
-# plt.imsave('test.jpg', np.flipud(color_map))
+plt.imsave('test.jpg', np.flipud(color_map))
 
 import rospy
 from geometry_msgs.msg import Twist
@@ -530,7 +506,7 @@ def calc_vels(command):
     rate = rospy.Rate(10)
 
     rads_per_s = ((command[0]) + (command[1]))/2
-    d_lin = r*rads_per_s/20
+    d_lin = r*rads_per_s/40
 
     d_theta = (r/L)*(command[1]-command[0])
 
@@ -555,10 +531,13 @@ def stop_bot():
     cmd_vel.publish(move_cmd)
 
 
+for node in solution_path:
+    print(node.command)
+
 # this loop skips the first node which has no command,
 # but does have the previous theta which we need
 # scale doen the angular velocities, to map form board coordinates to gazebo coordinates
-for node in solution_path:
-    calc_vels(node.command)
+# for node in solution_path:
+#     calc_vels(node.command)
 
-stop_bot()
+# stop_bot()
