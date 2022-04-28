@@ -11,7 +11,7 @@ import math
 
 
 r = 0.038*20
-L = 0.354*20
+L = 0.9*20
 
 
 # node class that each spot in the map will occupy
