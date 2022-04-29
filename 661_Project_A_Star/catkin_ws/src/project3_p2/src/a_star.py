@@ -11,8 +11,7 @@ import math
 
 
 r = 0.038*40
-L = 0.354*40
-
+L = 0.145*40
 
 # node class that each spot in the map will occupy
 # cell location and goal_location are tuples representing index 
@@ -537,7 +536,7 @@ for node in solution_path:
 # this loop skips the first node which has no command,
 # but does have the previous theta which we need
 # scale doen the angular velocities, to map form board coordinates to gazebo coordinates
-# for node in solution_path:
-#     calc_vels(node.command)
+for node in solution_path:
+    calc_vels(node.command)
 
-# stop_bot()
+stop_bot()
