@@ -83,6 +83,9 @@ def generate_margin(color_map, radius):
     for y in range(len(color_map)):
         for x in range(len(color_map[y])):
 
+            if y < radius or y > height-radius:
+                color_map[int(y)][x] = [0,255,0]
+
             # read the color map and check to see if the current space is an obstacle
             if (color_map[y][x][0] == 255 and color_map[y][x][1] == 0 and 
                 color_map[y][x][2] == 0):
@@ -236,7 +239,7 @@ def generate_curve(x,y,theta,UL,UR):
 
     # generate the subpoints for the curve and
     # append the points to the x and y list
-    while t<1:
+    while t<0.5:
         t = t + dt
         x += 0.5*r * (UL + UR) * math.cos(theta) * dt
         y += 0.5*r * (UL + UR) * math.sin(theta) * dt
@@ -386,6 +389,7 @@ height = 40
 thresh = 1
 
 # robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
+radius_margin = math.ceil(0.177/40)
 
 # starting paramters
 start_location = [19, 0, 0]
@@ -393,7 +397,7 @@ goal_location = [19, 159, 0]
 
 
 print('Building Color Map')
-color_map = create_color_map(height = height, width = width, radius= 3, goal_location=goal_location)
+color_map = create_color_map(height = height, width = width, radius= radius_margin+3, goal_location=goal_location)
 
 print('Building Board')
 board = create_board(width=width, height=height, thresh=thresh)
@@ -502,14 +506,14 @@ import math
 def calc_vels(command):
     rospy.init_node('a_star_turtle')
     cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(20)
 
     rads_per_s = ((command[0]) + (command[1]))/2
     d_lin = r*rads_per_s/40
 
     d_theta = (r/L)*(command[1]-command[0])
 
-    for num in range(10):
+    for num in range(20):
         print(f"X_d: {d_lin}, Th_d: {d_theta}")
 
 
