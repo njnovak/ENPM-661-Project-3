@@ -10,8 +10,8 @@ import sys
 import math
 
 
-r = 0.038*40
-L = 0.145*40
+r = 0.033*40
+L = 0.138*40
 
 # node class that each spot in the map will occupy
 # cell location and goal_location are tuples representing index 
@@ -83,8 +83,8 @@ def generate_margin(color_map, radius):
     for y in range(len(color_map)):
         for x in range(len(color_map[y])):
 
-            if y < radius or y > height-radius:
-                color_map[int(y)][x] = [0,255,0]
+            # if y < radius or y > height-radius:
+            #     color_map[int(y)][x] = [0,255,0]
 
             # read the color map and check to see if the current space is an obstacle
             if (color_map[y][x][0] == 255 and color_map[y][x][1] == 0 and 
@@ -239,7 +239,7 @@ def generate_curve(x,y,theta,UL,UR):
 
     # generate the subpoints for the curve and
     # append the points to the x and y list
-    while t<0.5:
+    while t<1:
         t = t + dt
         x += 0.5*r * (UL + UR) * math.cos(theta) * dt
         y += 0.5*r * (UL + UR) * math.sin(theta) * dt
@@ -271,7 +271,8 @@ def gen_next_nodes(curr_node, color_map, board, goal_location, thresh, rpms):
 
     next_nodes = []
 
-    actions=[[9, 7], [10,3], [7, 7], [3,10], [7, 9]]
+    # actions=[[9, 7], [10,3], [7, 7], [3,10], [7, 9]]
+    actions=[[6, 2], [4,2], [6, 6], [2, 4], [2, 6]]
 
 
     for action in actions:
@@ -389,7 +390,7 @@ height = 40
 thresh = 1
 
 # robot_radius = 0.177 m * 20 blocks/meter = 3.54 round up to 4
-radius_margin = math.ceil(0.177/40)
+radius_margin = math.ceil(0.177*40)
 
 # starting paramters
 start_location = [19, 0, 0]
@@ -397,7 +398,7 @@ goal_location = [19, 159, 0]
 
 
 print('Building Color Map')
-color_map = create_color_map(height = height, width = width, radius= radius_margin+3, goal_location=goal_location)
+color_map = create_color_map(height = height, width = width, radius= 4, goal_location=goal_location)
 
 print('Building Board')
 board = create_board(width=width, height=height, thresh=thresh)
@@ -463,8 +464,11 @@ while len(open_nodes) > 0:
         print('Animating Search Pattern')          
         # back track and animate the search and solution
         solution_path = get_solution_path(curr_node)
-        commands = get_commands(solution_path)
         animate(color_map, closed_nodes, solution_path)
+
+        with open('commands_3.txt', "w") as file:
+            for node in solution_path:
+                file.write(f"{node.command[0]},{node.command[1]}\n")
 
         break
 
@@ -506,14 +510,14 @@ import math
 def calc_vels(command):
     rospy.init_node('a_star_turtle')
     cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    rate = rospy.Rate(20)
+    rate = rospy.Rate(10)
 
     rads_per_s = ((command[0]) + (command[1]))/2
-    d_lin = r*rads_per_s/40
+    d_lin = (r*rads_per_s/40)
 
     d_theta = (r/L)*(command[1]-command[0])
 
-    for num in range(20):
+    for num in range(10):
         print(f"X_d: {d_lin}, Th_d: {d_theta}")
 
 
@@ -540,7 +544,7 @@ for node in solution_path:
 # this loop skips the first node which has no command,
 # but does have the previous theta which we need
 # scale doen the angular velocities, to map form board coordinates to gazebo coordinates
-for node in solution_path:
-    calc_vels(node.command)
+# for node in solution_path:
+#     calc_vels(node.command)
 
-stop_bot()
+# stop_bot()
